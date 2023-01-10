@@ -1,47 +1,44 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import UserForm from "../containers/UserForm";
 import UserList from "../containers/UserList";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
-export default class UserBox extends Component {
-    constructor(props) {
-        super(props)
-        this.state = {
-            showAdd: false,
-        }
-    }
+export default function UserBox(props) {
 
-    hiddenAddUser = () => {
-        this.setState({
+    const [add, setAdd] = useState({
+        showAdd: false,
+    });
+
+    const hiddenAddUser = () => {
+        setAdd({
             showAdd: false
         })
     }
 
-    showAddUser = () => {
-        this.setState({
+    const showAddUser = () => {
+        setAdd({
             showAdd: true
         })
     }
 
-    render() {
-        return (
-            <div className="container">
-                <div className="card">
-                    <div className="card-header text-center">
-                        <h1>Phone Book Apps</h1>
-                    </div>
+    return (
+        <div className="container">
+            <div className="card">
+                <div className="card-header text-center">
+                    <h1>Phone Book Apps</h1>
                 </div>
-                <div className="card-body mt-3">
-                    {this.state.showAdd ? <UserForm cancel={this.hiddenAddUser} /> : <button type="submit" className="btn btn-primary" onClick={() => this.showAddUser()}><FontAwesomeIcon icon={faPlus} /> add</button>}
-                </div>
-                <div className="card-body mt-3">
-                    <UserForm
-                        search={this.searchUser} submitLabel=" search" fontlabel="Search Form"
-                    />
-                </div>
-                <UserList />
             </div>
-        )
-    }
+            <div className="card-body mt-3">
+                {add.showAdd ? <UserForm cancel={hiddenAddUser} /> : <button type="submit" className="btn btn-primary" onClick={() => showAddUser()}><FontAwesomeIcon icon={faPlus} /> add</button>}
+            </div>
+            <div className="card-body mt-3">
+                <UserForm
+                    submitLabel=" search" fontlabel="Search Form"
+                />
+            </div>
+            <UserList />
+        </div>
+    )
+
 }

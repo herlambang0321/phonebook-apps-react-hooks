@@ -1,92 +1,80 @@
-import React, { Component } from 'react'
+import React, { useCallback, useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons'
 import { faBan, faMagnifyingGlass, faRotateLeft } from '@fortawesome/free-solid-svg-icons'
 import { addUser, searchUser } from "../actions/api";
-import { connect } from 'react-redux'
+import { useDispatch } from 'react-redux'
 
-class UserForm extends Component {
+export default function UserForm(props) {
 
-    constructor(props) {
-        super(props)
-        this.state = {
-            name: '',
-            phone: ''
-        }
-    }
+    const dispatch = useDispatch()
 
-    handleInputChange = (event) => {
+    const [user, setUser] = useState({
+        name: '',
+        phone: ''
+    });
+
+    const handleInputChange = (event) => {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
 
-        this.setState({
+        setUser({
+            ...user,
             [name]: value
         });
     }
 
-    handleSubmit = (event) => {
+    const handleSubmit = useCallback((event) => {
         event.preventDefault()
-        this.props.add(this.state.name, this.state.phone)
-        this.setState({ name: '', phone: '' })
-    }
+        dispatch(addUser(user.name, user.phone))
+        setUser({ name: '', phone: '' })
+    }, [dispatch, user])
 
-    handleSearch = (event) => {
+    const handleSearch = useCallback((event) => {
         event.preventDefault()
-        this.props.search({ name: this.state.name, phone: this.state.phone })
-    }
+        dispatch(searchUser({ name: user.name, phone: user.phone }))
+    }, [dispatch, user])
 
-    handleCancel = () => {
-        if (!this.props.fontlabel) {
-            this.props.cancel()
+    const handleCancel = () => {
+        if (!props.fontlabel) {
+            props.cancel()
         }
-        this.setState({ name: '', phone: '' })
+        setUser({ name: '', phone: '' })
     }
 
-    render() {
-        return (
-            <div>
-                <div className="card">
-                    <div className="card-header">
-                        <h6>{this.props.fontlabel || 'Adding Form'}</h6>
-                    </div>
-                    <form className="m-3" onSubmit={this.props.fontlabel ? this.handleSearch : this.handleSubmit}>
-                        <div className="d-flex justify-content me-5">
-                            <div className="d-flex align-items-center">
-                                <label htmlFor="name">Name</label>
-                            </div>
-                            <div className="d-flex col-sm-2">
-                                <input type="text" className="form-control" id="name" name="name" placeholder="name"
-                                    onChange={this.handleInputChange} value={this.state.name} />
-                            </div>
-                            <div className="d-flex align-items-center">
-                                <label htmlFor="phone">Phone</label>
-                            </div>
-                            <div className="d-flex col-sm-2">
-                                <input type="text" className="form-control" id="phone" name="phone" placeholder="phone"
-                                    onChange={this.handleInputChange} value={this.state.phone} />
-                            </div>
-                            {this.props.submitLabel ?
-                                <button type="submit" className="btn btn-info text-white"><FontAwesomeIcon icon={faMagnifyingGlass} />{this.props.submitLabel || ' save'}</button>
-                                :
-                                <button type="submit" className="btn btn-primary"><FontAwesomeIcon icon={faCircleCheck} />{this.props.submitLabel || ' save'}</button>
-                            }
-                            <button className="btn btn-warning text-white" onClick={this.handleCancel}><FontAwesomeIcon icon={this.props.submitLabel ? faRotateLeft : faBan} style={{ transform: 'rotate(90deg' }} />{this.props.submitLabel ? ' reset' : ' cancel'}</button>
-                        </div>
-                    </form>
+    return (
+        <div>
+            <div className="card">
+                <div className="card-header">
+                    <h6>{props.fontlabel || 'Adding Form'}</h6>
                 </div>
+                <form className="m-3" onSubmit={props.fontlabel ? handleSearch : handleSubmit}>
+                    <div className="d-flex justify-content me-5">
+                        <div className="d-flex align-items-center">
+                            <label htmlFor="name">Name</label>
+                        </div>
+                        <div className="d-flex col-sm-2">
+                            <input type="text" className="form-control" id="name" name="name" placeholder="name"
+                                onChange={handleInputChange} value={user.name} />
+                        </div>
+                        <div className="d-flex align-items-center">
+                            <label htmlFor="phone">Phone</label>
+                        </div>
+                        <div className="d-flex col-sm-2">
+                            <input type="text" className="form-control" id="phone" name="phone" placeholder="phone"
+                                onChange={handleInputChange} value={user.phone} />
+                        </div>
+                        {props.submitLabel ?
+                            <button type="submit" className="btn btn-info text-white"><FontAwesomeIcon icon={faMagnifyingGlass} />{props.submitLabel || ' save'}</button>
+                            :
+                            <button type="submit" className="btn btn-primary"><FontAwesomeIcon icon={faCircleCheck} />{props.submitLabel || ' save'}</button>
+                        }
+                        <button className="btn btn-warning text-white" onClick={handleCancel}><FontAwesomeIcon icon={props.submitLabel ? faRotateLeft : faBan} style={{ transform: 'rotate(90deg' }} />{props.submitLabel ? ' reset' : ' cancel'}</button>
+                    </div>
+                </form>
             </div>
-        )
-    }
+        </div>
+    )
 
 }
-
-const mapDispatchToProps = (dispatch) => ({
-    add: (name, phone) => dispatch(addUser(name, phone)),
-    search: (query) => dispatch(searchUser(query))
-})
-
-export default connect(
-    null,
-    mapDispatchToProps
-)(UserForm)
